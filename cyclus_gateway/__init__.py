@@ -5,14 +5,11 @@ from werkzeug.contrib.fixers import ProxyFix
 from .config import config_by_name
 from .db import db
 from .security import jwt, bcrypt
-from .api import api
-
-print('loading file')
+from .api import blueprint
 
 
 def create_app(config_name='development'):
     print('create app', config_name)
-    # print('configs:', config_by_name)
 
     app = Flask(__name__, instance_relative_config=True)
     app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -30,11 +27,12 @@ def create_app(config_name='development'):
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
-    api.init_app(app)
+    # api.init_app(app)
+    app.register_blueprint(blueprint, url_prefix='/api')
 
     @app.before_first_request
     def create_tables():
         db.create_all()
 
-    print('**** app created')
+    print(f'**** gateway [{config_name}] created')
     return app
