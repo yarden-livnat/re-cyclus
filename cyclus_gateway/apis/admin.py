@@ -25,8 +25,9 @@ class Register(Resource):
             'refresh_token': refresh_token
         }
 
+
 @api.route('/unregister')
-class unregister(Resource):
+class Unregister(Resource):
     @fresh_jwt_required
     def delete(self):
         identity = get_jwt_identity()

@@ -44,6 +44,7 @@ class DevConfig(Config):
     # for how safely store JWTs in cookies
     JWT_COOKIE_CSRF_PROTECT = False
 
+
 class TestConfig(Config):
     TESTING = True
     DEBUG = True

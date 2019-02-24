@@ -15,7 +15,7 @@ def config_app(app, config_obj):
         app.config.from_mapping(config_obj)
 
 
-def create_app(config_obj=None):
+def create_server(config_obj=None):
     app = Flask(__name__, instance_relative_config=False)
     config_app(app, config_obj)
 

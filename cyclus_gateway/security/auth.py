@@ -10,7 +10,8 @@ from .exceptions import TokenNotFound
 
 jwt = JWTManager()
 
-def _epoch_utc_to_datetime(epoch_utc):
+
+def epoch_utc_to_datetime(epoch_utc):
     """
     Helper function for converting epoch timestamps (as stored in JWTs) into
     python datetime objects (which are easier to use with sqlalchemy).
@@ -22,19 +23,24 @@ def _epoch_utc_to_datetime(epoch_utc):
 def user_identify(user):
     return user.email if type(user) != str else user
 
+
 @jwt.user_claims_loader
 def add_claims(user):
-    return {'roles': user.roles}
+    return {'username': user.username,
+            'email': user.email,
+            'roles': user.roles
+            }
+
 
 @jwt.user_loader_callback_loader
 def jwt_identity(identity):
-    print('jwt_identity:', identity)
     return User.query.filter_by(email=identity).first()
+
 
 @jwt.token_in_blacklist_loader
 def check_if_token_revoked(decoded_token):
-    print('check if token revoked:', decoded_token)
     return is_token_revoked(decoded_token)
+
 
 def get_access_token(user, fresh=False):
     token = create_access_token(identity=user, fresh=fresh)
@@ -64,7 +70,6 @@ def revoke_token(**kwargs):
 
 
 def revoke_all(identity):
-    print('Token info', Token.__doc__)
     for token in get_user_active_tokens(identity):
         token.delete(commit=False)
     db.session.commit()
@@ -80,7 +85,7 @@ def save_token(encoded_token, identity_claim):
         jti=decoded_token['jti'],
         token_type=decoded_token['type'],
         user_identity=decoded_token[identity_claim],
-        expires=_epoch_utc_to_datetime(decoded_token['exp']),
+        expires=epoch_utc_to_datetime(decoded_token['exp']),
         revoked=False,
     )
     token.save()
