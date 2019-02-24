@@ -1,4 +1,3 @@
-from flask import redirect
 from flask_restplus import Namespace, Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt_claims
 from cyclus_gateway.utils import forward

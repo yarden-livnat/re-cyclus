@@ -1,17 +1,20 @@
-from flask import jsonify
+from flask import Blueprint
 from flask_restplus import Resource, Namespace
-from flask_jwt_extended import ( get_jwt_identity, get_raw_jwt,
+from flask_jwt_extended import ( get_raw_jwt,
                 jwt_required, fresh_jwt_required, jwt_refresh_token_required)
 from webargs.flaskparser import use_args, use_kwargs
 
 from cyclus_gateway.security import User, UserSchema, TokenSchema, auth
 
 
-api = Namespace('', description='authentication')
+api = Namespace('api', description='run remote cyclus')
 
 
 @api.route('/register')
+@api.doc()
 class Register(Resource):
+
+    @api.doc(responses={401: 'Unauthorized'})
     @use_kwargs(UserSchema())
     def post(self, username, password, email, **kwargs):
         if User.query.filter_by(email=email).first():
@@ -90,3 +93,23 @@ class Revoke(Resource):
         identity = get_jwt_identity()
         auth.revoke_token(id=token_id, user_identity=identity)
         return {'message': 'revoked'}
+
+
+# proxies
+
+
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt_claims
+from cyclus_gateway.utils import forward
+
+
+batch_server = 'http://localhost:5010/'
+
+
+@api.route('api/batch/<path:path>')
+class Batch(Resource):
+    @jwt_required
+    def post(self, path):
+        claims = get_jwt_claims()
+        print('claims:', claims)
+        resp = forward(service='api/batch', url=batch_server)
+        return resp

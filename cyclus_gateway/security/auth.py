@@ -1,8 +1,7 @@
 from datetime import datetime
 from flask import current_app
 from flask_jwt_extended import (JWTManager,
-    create_access_token, create_refresh_token,
-    decode_token)
+                                create_access_token, create_refresh_token, decode_token)
 
 from cyclus_gateway.db import db
 from .models import User, Token

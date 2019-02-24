@@ -11,6 +11,7 @@ class UserSchema(Schema):
     class Meta:
         strict = True
 
+
 class TokenSchema(Schema):
     id = fields.Integer()
     token_type = fields.Str()
