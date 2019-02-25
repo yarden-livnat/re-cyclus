@@ -39,4 +39,6 @@ class Batch(Resource):
         claims = get_jwt_claims()
         print('claims:', claims)
         resp = forward(f'{batch_server}/{path}')
+        if resp.status_code == 404:
+            return {'status': 'service is down'}, 404
         return resp

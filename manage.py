@@ -6,10 +6,12 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 
 from cyclus_gateway import create_app, db
+from cyclus_gateway.security import auth
+from cyclus_gateway.security.models import User, Token
 
 app = create_app(os.getenv('FLASK_ENV') or 'development')
 
-app.app_context().push()
+# app.app_context().push()
 
 manager = Manager(app)
 
@@ -19,7 +21,17 @@ manager.add_command('db', MigrateCommand)
 
 @manager.command
 def run():
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
+
+
+@manager.command
+def init():
+    db.create_all()
+    admin = User(username='admin', email='none@nowhere.com', password='test')
+    admin.save()
+    auth.get_access_token(admin)
+    auth.get_refresh_token(admin)
+
 
 
 @manager.command

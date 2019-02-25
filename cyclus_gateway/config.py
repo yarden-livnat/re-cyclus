@@ -1,8 +1,8 @@
 """Application configuration."""
-import os
+from pathlib import Path
 from datetime import timedelta
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+db_dir = Path('.').parent.resolve()
 
 
 class Config(object):
@@ -24,7 +24,7 @@ class DevelopmentConfig(Config):
     ENV = 'development'
     DEBUG = True
     DB_NAME = 'dev.db'
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'gateway_dev.db')
+    SQLALCHEMY_DATABASE_URI = f'sqlite:///{db_dir / "gateway_dev.db"}'
 
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=30)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
@@ -43,7 +43,7 @@ class TestingConfig(Config):
     DEBUG = True
     BCRYPT_LOG_ROUNDS = 4
 
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'gateway_test.db')
+    SQLALCHEMY_DATABASE_URI = f'sqlite:///{db_dir / "gateway_test.db"}'
     PRESERVE_CONTEXT_ON_EXCEPTION = False
 
     # Only allow JWT cookies to be sent over https.

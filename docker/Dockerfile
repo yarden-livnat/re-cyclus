@@ -9,7 +9,6 @@ RUN pip install -U pip \
 COPY . /code
 WORKDIR /code
 
-#ENV PYTHONPATH .
 CMD ["python", "manage.py", "run"]
 EXPOSE 5000
 
