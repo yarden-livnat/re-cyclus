@@ -1,5 +1,5 @@
 import requests
-from flask import Blueprint
+import json
 from flask import request, Response, stream_with_context
 
 
@@ -8,16 +8,16 @@ from flask_jwt_extended import jwt_required, get_jwt_claims
 
 api = Namespace('services', description='services')
 
-batch_server = 'http://batch:5010'
+batch_server = 'http://batch:5010/api'
 
 
-def forward(url, stream=False):
+def forward(url, data, stream=False):
 
     resp = requests.request(
         method=request.method,
         url=url,
         headers={key: value for (key, value) in request.headers if key != 'Host'},
-        data=request.get_data(),
+        data=data,
         cookies=request.cookies,
         allow_redirects=False,
         stream=stream)
@@ -38,7 +38,13 @@ class Batch(Resource):
     def post(self, path):
         claims = get_jwt_claims()
         print('claims:', claims)
-        resp = forward(f'{batch_server}/{path}')
+        data = json.loads(request.data)
+        data['token'] = {
+            'roles': claims['roles']
+        }
+        data['user'] = claims['username']
+
+        resp = forward(url=f'{batch_server}/{path}', data=json.dumps(data))
         if resp.status_code == 404:
             return {'status': 'service is down'}, 404
         return resp
