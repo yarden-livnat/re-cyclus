@@ -1,0 +1,73 @@
+version: "3"
+services:
+  redis:
+    container_name: redis
+    image: "redis:alpine"
+    command: redis-server --appendonly yes
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - cyclus
+
+  batch:
+    container_name: batch
+    build:
+      context: services/batch
+      dockerfile: ./Dockerfile
+    environment:
+      - FLASK_ENV=development
+    ports:
+      - "5010:5010"
+    volumes:
+      - ./services/batch:/code
+    depends_on:
+      - redis
+    networks:
+      - cyclus
+
+  worker:
+      build:
+        context: services/worker
+        dockerfile: ./Dockerfile
+      command: python -m recyclus_worker &>> /jobs/error.log
+      volumes:
+      - ./services/worker:/code
+      - ./jobs:/jobs
+      restart: on-failure
+      depends_on:
+        - redis
+      networks:
+        - cyclus
+
+  # data-service:
+  #   build: ./data_service
+  #   command: python data_service/app.py
+  #   environment:
+  #     - FLASK_ENV=development
+  #     - SECRET_KEY="g0d0+433j8sdxm1f_7=74"
+  #   ports:
+  #     - "5020:5020"
+  #   volumes:
+  #     - ./data_service:/code
+
+  gateway:
+    container_name: gateway
+    build:
+      context: services/gateway
+      dockerfile: ./docker/Dockerfile
+    environment:
+      - FLASK_ENV=development
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./services/gateway:/code
+    networks:
+      - cyclus
+    depends_on:
+      - batch
+
+volumes:
+  db-data:
+
+networks:
+  cyclus:
