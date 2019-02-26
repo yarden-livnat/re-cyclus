@@ -32,7 +32,7 @@ def forward(url, data, stream=False):
         return Response(resp.content, resp.status_code, headers)
 
 
-def add_credentials_and_forward():
+def add_credentials_and_forward(path):
     claims = get_jwt_claims()
     data = json.loads(request.data) if request.data else {}
     data['identity'] = {
@@ -50,9 +50,9 @@ def add_credentials_and_forward():
 class Batch(Resource):
     @jwt_required
     def get(self, path):
-        return add_credentials_and_forward()
+        return add_credentials_and_forward(path)
 
     @jwt_required
     def post(self, path):
-        return add_credentials_and_forward()
+        return add_credentials_and_forward(path)
 
