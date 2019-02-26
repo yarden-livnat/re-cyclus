@@ -30,21 +30,29 @@ def forward(url, data, stream=False):
         return Response(stream_with_context(resp.iter_content()), content_type=resp.headers['content-type'])
     else:
         return Response(resp.content, resp.status_code, headers)
-    
-    
+
+
+def add_credentials_and_forward():
+    claims = get_jwt_claims()
+    data = json.loads(request.data) if request.data else {}
+    data['identity'] = {
+        'user': claims['username'],
+        'roles': claims['roles']
+    }
+
+    resp = forward(url=f'{batch_server}/{path}', data=json.dumps(data))
+    if resp.status_code == 404:
+        return {'status': 'service is down'}, 404
+    return resp
+
+
 @api.route('/batch/<path:path>')
 class Batch(Resource):
     @jwt_required
-    def post(self, path):
-        claims = get_jwt_claims()
-        print('claims:', claims)
-        data = json.loads(request.data)
-        data['token'] = {
-            'roles': claims['roles']
-        }
-        data['user'] = claims['username']
+    def get(self, path):
+        return add_credentials_and_forward()
 
-        resp = forward(url=f'{batch_server}/{path}', data=json.dumps(data))
-        if resp.status_code == 404:
-            return {'status': 'service is down'}, 404
-        return resp
+    @jwt_required
+    def post(self, path):
+        return add_credentials_and_forward()
+
