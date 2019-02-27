@@ -4,7 +4,7 @@ from flask_jwt_extended import ( get_raw_jwt,
                 jwt_required, fresh_jwt_required, jwt_refresh_token_required)
 from webargs.flaskparser import use_args, use_kwargs
 
-from cyclus_gateway.security import User, UserSchema, TokenSchema, auth
+from ..security import User, UserSchema, TokenSchema, auth
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 

@@ -1,8 +1,8 @@
 import unittest
 import datetime
 
-from cyclus_gateway import db
-from cyclus_gateway.security.models import User
+from recyclus_gateway import db
+from recyclus_gateway.security.models import User
 from testing.base import BaseTestCase
 
 

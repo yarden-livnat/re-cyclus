@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='cyclus_gateway',
+    name='recyclus_gateway',
     version='0.2.0',
     license='BSD',
     maintainer='Yarden Livnat',
@@ -10,7 +10,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'cyclus_gateway',
     ],
     extras_require={
         'test': [

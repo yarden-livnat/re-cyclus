@@ -2,7 +2,7 @@ import datetime as dt
 import uuid
 
 from .utils import bcrypt
-from cyclus_gateway.db import db
+from ..db import db
 
 
 class User(db.Model):

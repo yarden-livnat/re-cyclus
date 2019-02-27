@@ -12,7 +12,7 @@ RUN pip install -U pip \
     && pip install -r /tmp/requirements/dev.txt
 
 WORKDIR /code
-#COPY ./cyclus_gateway instance *.db manage.py /code/
+#COPY ./recyclus_gateway instance *.db manage.py /code/
 COPY . /code
 
 EXPOSE 5000

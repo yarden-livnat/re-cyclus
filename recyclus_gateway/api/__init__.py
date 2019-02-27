@@ -3,7 +3,7 @@ from flask_restplus import Api
 
 from jwt.exceptions import ExpiredSignatureError
 from flask_jwt_extended.exceptions import JWTExtendedException
-from cyclus_gateway.security.exceptions import TokenNotFound
+from ..security.exceptions import TokenNotFound
 
 from .admin import api as admin_api
 from .auth import api as auth_api

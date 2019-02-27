@@ -9,6 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_claims
 api = Namespace('services', description='services')
 
 batch_server = 'http://batch:5010/api'
+datastore_server = 'http://datastore:5020/api'
 
 
 def forward(url, data, stream=False):
@@ -32,7 +33,7 @@ def forward(url, data, stream=False):
         return Response(resp.content, resp.status_code, headers)
 
 
-def add_credentials_and_forward(path):
+def add_credentials_and_forward(server, path, stream=False):
     claims = get_jwt_claims()
     data = json.loads(request.data) if request.data else {}
     data['identity'] = {
@@ -40,7 +41,7 @@ def add_credentials_and_forward(path):
         'roles': claims['roles']
     }
 
-    resp = forward(url=f'{batch_server}/{path}', data=json.dumps(data))
+    resp = forward(url=f'{server}/{path}', data=json.dumps(data), stream=stream)
     if resp.status_code == 404:
         return {'status': 'service is down'}, 404
     return resp
@@ -50,9 +51,16 @@ def add_credentials_and_forward(path):
 class Batch(Resource):
     @jwt_required
     def get(self, path):
-        return add_credentials_and_forward(path)
+        return add_credentials_and_forward(batch_server, path)
 
     @jwt_required
     def post(self, path):
-        return add_credentials_and_forward(path)
+        return add_credentials_and_forward(batch_server, path)
+
+
+@api.route('/datastore/<path:path>')
+class Datastore(Resource):
+    @jwt_required
+    def get(self, path):
+        return add_credentials_and_forward(datastore_server, path, stream=True)
 

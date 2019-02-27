@@ -1,5 +1,5 @@
 from flask_testing import TestCase
-from cyclus_gateway import db
+from recyclus_gateway import db
 from manage import app
 
 
@@ -7,7 +7,7 @@ class BaseTestCase(TestCase):
     """ Base Tests """
 
     def create_app(self):
-        app.config.from_object('cyclus_gateway.config.TestingConfig')
+        app.config.from_object('recyclus_gateway.config.TestingConfig')
         return app
 
     def setUp(self):

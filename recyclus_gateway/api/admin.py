@@ -3,7 +3,7 @@ from flask_restplus import Resource, Namespace
 from flask_jwt_extended import (fresh_jwt_required)
 from webargs.flaskparser import use_args, use_kwargs
 
-from cyclus_gateway.security import User, UserSchema, auth
+from ..security import User, UserSchema, auth
 
 from flask_jwt_extended import get_jwt_identity
 
