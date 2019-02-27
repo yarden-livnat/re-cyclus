@@ -1,8 +1,7 @@
 import requests
 import json
-from flask import request, Response, stream_with_context
 
-
+from flask import request, Response, stream_with_context, current_app as app
 from flask_restplus import Resource, Namespace
 from flask_jwt_extended import jwt_required, get_jwt_claims
 
@@ -14,23 +13,28 @@ datastore_server = 'http://datastore:5020/api'
 
 def forward(url, data, stream=False):
 
-    resp = requests.request(
-        method=request.method,
-        url=url,
-        headers={key: value for (key, value) in request.headers if key != 'Host'},
-        data=data,
-        cookies=request.cookies,
-        allow_redirects=False,
-        stream=stream)
+    try:
+        resp = requests.request(
+            method=request.method,
+            url=url,
+            headers={key: value for (key, value) in request.headers if key != 'Host'},
+            data=data,
+            cookies=request.cookies,
+            allow_redirects=False,
+            stream=stream)
 
-    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = [(name, value) for (name, value) in resp.raw.headers.items()
-               if name.lower() not in excluded_headers]
+        app.logger.debug('forward status_code: %s  [stream=%s]', resp.status_code, stream)
 
-    if stream:
-        return Response(stream_with_context(resp.iter_content()), content_type=resp.headers['content-type'])
-    else:
-        return Response(resp.content, resp.status_code, headers)
+        excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+        headers = [(name, value) for (name, value) in resp.raw.headers.items()
+                   if name.lower() not in excluded_headers]
+
+        if stream:
+            return Response(stream_with_context(resp.iter_content()), resp.status_code, content_type=resp.headers['content-type'])
+        else:
+            return Response(resp.content, resp.status_code, headers)
+    except requests.exceptions.ConnectionError:
+        return {'message': 'service not available'}, 502
 
 
 def add_credentials_and_forward(server, path, stream=False):
@@ -42,8 +46,6 @@ def add_credentials_and_forward(server, path, stream=False):
     }
 
     resp = forward(url=f'{server}/{path}', data=json.dumps(data), stream=stream)
-    if resp.status_code == 404:
-        return {'status': 'service is down'}, 404
     return resp
 
 
@@ -62,5 +64,11 @@ class Batch(Resource):
 class Datastore(Resource):
     @jwt_required
     def get(self, path):
-        return add_credentials_and_forward(datastore_server, path, stream=True)
+        return add_credentials_and_forward(datastore_server, path, stream=False)
+
+
+# @api.route('/test/<int:code>')
+# class Datastore(Resource):
+#     def get(self, code):
+#         return {'code': code}, code
 
