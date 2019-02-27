@@ -5,7 +5,7 @@ services:
     image: "redis:alpine"
     command: redis-server --appendonly yes
     volumes:
-      - ./redis-data:/data
+      - ./repositories/redis:/data
     networks:
       - cyclus
 
@@ -26,29 +26,48 @@ services:
       - cyclus
 
   worker:
-      build:
-        context: services/worker
-        dockerfile: ./Dockerfile
-      command: python -m recyclus_worker &>> /jobs/error.log
-      volumes:
+    build:
+      context: services/worker
+      dockerfile: ./Dockerfile
+    volumes:
       - ./services/worker:/code
-      - ./jobs:/jobs
-      restart: on-failure
-      depends_on:
-        - redis
-      networks:
-        - cyclus
+      - ./repositories/jobs:/jobs
+    restart: on-failure
+    depends_on:
+      - redis
+    networks:
+      - cyclus
 
-  # data-service:
-  #   build: ./data_service
-  #   command: python data_service/app.py
-  #   environment:
-  #     - FLASK_ENV=development
-  #     - SECRET_KEY="g0d0+433j8sdxm1f_7=74"
-  #   ports:
-  #     - "5020:5020"
-  #   volumes:
-  #     - ./data_service:/code
+  datastore:
+    container_name: datastore
+    build:
+      context: services/datastore
+      dockerfile: ./Dockerfile
+    environment:
+      - FLASK_ENV=development
+    ports:
+      - "5020:5020"
+    volumes:
+      - ./services/datastore:/code
+      - ./repositories/datastore/files:/files
+    depends_on:
+      - datastore-db
+    networks:
+      - cyclus
+
+  datastore-db:
+    container_name: datastore-db
+    image: "mongo:latest"
+#    env_file:
+#      - ./env/datastore_db.env
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./repositories/datastore/db:/data/db
+    networks:
+      - cyclus
+
 
   gateway:
     container_name: gateway
@@ -64,10 +83,12 @@ services:
     networks:
       - cyclus
     depends_on:
+      - redis
       - batch
+      - datastore
 
 volumes:
-  db-data:
+  data:
 
 networks:
   cyclus:
