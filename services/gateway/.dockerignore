@@ -1,0 +1,6 @@
+*.egg-info
+docker
+testing
+.git
+.idea
+__pycache__
