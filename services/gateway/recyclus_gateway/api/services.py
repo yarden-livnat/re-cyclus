@@ -1,7 +1,7 @@
 import requests
 import json
 
-from flask import request, Response, stream_with_context, current_app as app, jsonify
+from flask import request, Response, stream_with_context, current_app as app
 from flask_restplus import Resource, Namespace
 from flask_jwt_extended import jwt_required, get_jwt_claims
 
@@ -14,7 +14,6 @@ datastore_server = 'http://datastore:5020/api'
 def forward(url, data, stream=False):
 
     try:
-        # app.logger.debug('forward payload:', json.dumps(data))
         resp = requests.request(
             method=request.method,
             url=url,
@@ -40,7 +39,6 @@ def forward(url, data, stream=False):
 
 def add_credentials_and_forward(server, path, stream=False):
     claims = get_jwt_claims()
-    # r = request
     data = json.loads(request.data) if request.data else {}
     data['identity'] = {
         'user': claims['username'],
@@ -51,7 +49,7 @@ def add_credentials_and_forward(server, path, stream=False):
     return resp
 
 
-@api.route('batch/<path:path>')
+@api.route('/batch/<path:path>')
 class Batch(Resource):
     @jwt_required
     def get(self, path):
@@ -62,10 +60,15 @@ class Batch(Resource):
         return add_credentials_and_forward(batch_server, path)
 
 
-@api.route('datastore/<path:path>')
+@api.route('/datastore/<path:path>')
 class Datastore(Resource):
     @jwt_required
     def get(self, path):
         return add_credentials_and_forward(datastore_server, path, stream=False)
 
+
+# @api.route('/test/<int:code>')
+# class Datastore(Resource):
+#     def get(self, code):
+#         return {'code': code}, code
 
