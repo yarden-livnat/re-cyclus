@@ -80,6 +80,7 @@ services:
       - "5000:5000"
     volumes:
       - ./services/gateway:/code
+      - ./repositories/gateway:/data
     networks:
       - cyclus
     depends_on:
