@@ -27,7 +27,7 @@ def run():
 @manager.command
 def init():
     db.create_all()
-    admin = User(username='admin', email='none@nowhere.com', password='test')
+    admin = User(username='admin', password='test')
     admin.save()
     auth.get_access_token(admin)
     auth.get_refresh_token(admin)

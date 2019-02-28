@@ -20,20 +20,20 @@ def epoch_utc_to_datetime(epoch_utc):
 
 @jwt.user_identity_loader
 def user_identify(user):
-    return user.email if type(user) != str else user
+    return user.username if type(user) != str else user
 
 
 @jwt.user_claims_loader
 def add_claims(user):
     return {'username': user.username,
-            'email': user.email,
+            'username': user.username,
             'roles': user.roles
             }
 
 
 @jwt.user_loader_callback_loader
 def jwt_identity(identity):
-    return User.query.filter_by(email=identity).first()
+    return User.query.filter_by(username=identity).first()
 
 
 @jwt.token_in_blacklist_loader

@@ -11,7 +11,6 @@ class TestUserModel(BaseTestCase):
     def test_encode_auth_token(self):
         user = User(
             username="test",
-            email='test@test.com',
             password='test'
         )
         db.session.add(user)
@@ -22,7 +21,6 @@ class TestUserModel(BaseTestCase):
     def test_decode_auth_token(self):
         user = User(
             username='test',
-            email='test@test.com',
             password='test'
         )
         db.session.add(user)

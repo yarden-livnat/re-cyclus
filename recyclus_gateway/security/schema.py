@@ -3,7 +3,6 @@ from marshmallow import Schema, fields, pre_load, post_dump
 
 class UserSchema(Schema):
     username = fields.Str(required=True)
-    email = fields.Email(required=True)
     password = fields.Str(load_only=True)
     createdAt = fields.DateTime(attribute='created_at', dump_only=True)
     updatedAt = fields.DateTime(attribute='updated_at')

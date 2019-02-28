@@ -13,9 +13,9 @@ api = Namespace('auth', description='authentication services')
 
 @api.route('/login')
 class Login(Resource):
-    @use_kwargs(UserSchema(only=('email', 'password')))
-    def post(self, email, password):
-        user = User.query.filter_by(email=email).first()
+    @use_kwargs(UserSchema(only=('username', 'password')))
+    def post(self, username, password):
+        user = User.query.filter_by(username=username).first()
         if not user or not user.verify_password(password):
             return {'message': 'Bad username or password'}, 401
 

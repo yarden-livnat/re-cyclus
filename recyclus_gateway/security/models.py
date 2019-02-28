@@ -8,9 +8,8 @@ from ..db import db
 class User(db.Model):
     __tablename__ = 'users'
 
-    id = db.Column(db.String, primary_key=True, default=str(uuid.uuid4()))
+    id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     roles = db.Column(db.String(120), nullable=False, default='user')
     created_at = db.Column(db.DateTime, nullable=False, default=dt.datetime.now)
@@ -19,8 +18,8 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.username
 
-    def __init__(self, username, email, password=None, **kwargs):
-        db.Model.__init__(self, username=username, email=email, **kwargs)
+    def __init__(self, username, password=None, **kwargs):
+        db.Model.__init__(self, username=username, **kwargs)
         if password:
             self.set_password(password)
         else:

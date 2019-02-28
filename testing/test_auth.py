@@ -8,8 +8,7 @@ def register_user(self):
     return self.client.post(
         '/api/admin/register',
         data=json.dumps(dict(
-            email='example@gmail.com',
-            username='username',
+            username='test',
             password='123456'
         )),
         content_type='application/json'
@@ -20,7 +19,7 @@ def login_user(self):
     return self.client.post(
         '/api/auth/login',
         data=json.dumps(dict(
-            email='example@gmail.com',
+            username='test',
             password='123456'
         )),
         content_type='application/json'
