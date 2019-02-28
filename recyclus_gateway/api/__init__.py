@@ -20,7 +20,7 @@ api = Api(blueprint,
 
 api.add_namespace(admin_api)
 api.add_namespace(auth_api)
-api.add_namespace(services_api, path='')
+api.add_namespace(services_api, path='/')
 
 @api.errorhandler
 def default_error_handler(error):

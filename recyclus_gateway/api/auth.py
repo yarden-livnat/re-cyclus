@@ -20,13 +20,8 @@ class Login(Resource):
             return {'message': 'Bad username or password'}, 401
 
         access_token = auth.get_access_token(user, fresh=True)
-        refresh_token = auth.get_refresh_token(user)
-        return {
-            'Authorization': {
-                'access_token': access_token,
-                'refresh_token': refresh_token
-            }
-        }, 200
+        # refresh_token = auth.get_refresh_token(user)
+        return { 'token': access_token }
 
 
 @api.route('/logout')
