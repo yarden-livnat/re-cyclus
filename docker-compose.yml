@@ -12,14 +12,14 @@ services:
   batch:
     container_name: batch
     build:
-      context: services/batch
+      context: batch
       dockerfile: ./Dockerfile
     environment:
       - FLASK_ENV=development
     ports:
       - "5010:5010"
     volumes:
-      - ./services/batch:/code
+      - ./batch:/code
     depends_on:
       - redis
     networks:
@@ -27,10 +27,10 @@ services:
 
   worker:
     build:
-      context: services/worker
+      context: worker
       dockerfile: ./Dockerfile
     volumes:
-      - ./services/worker:/code
+      - ./worker:/code
       - ./repositories/jobs:/jobs
     restart: on-failure
     depends_on:
@@ -41,14 +41,14 @@ services:
   datastore:
     container_name: datastore
     build:
-      context: services/datastore
+      context: datastore
       dockerfile: ./Dockerfile
     environment:
       - FLASK_ENV=development
     ports:
       - "5020:5020"
     volumes:
-      - ./services/datastore:/code
+      - ./datastore:/code
       - ./repositories/datastore/files:/files
     depends_on:
       - datastore-db
@@ -72,14 +72,17 @@ services:
   gateway:
     container_name: gateway
     build:
-      context: services/gateway
+      context: gateway
       dockerfile: ./docker/Dockerfile
     environment:
       - FLASK_ENV=development
+      - FOO=bar
+    env_file:
+      - env/gateway.env
     ports:
       - "5000:5000"
     volumes:
-      - ./services/gateway:/code
+      - ./gateway:/code
       - ./repositories/gateway:/data
     networks:
       - cyclus
