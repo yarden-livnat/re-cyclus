@@ -1,7 +1,6 @@
 version: "3"
 services:
   redis:
-    container_name: redis
     image: "redis:alpine"
     command: redis-server --appendonly yes
     volumes:
@@ -10,12 +9,11 @@ services:
       - cyclus
 
   batch:
-    container_name: batch
     build:
       context: batch
       dockerfile: ./Dockerfile
-    environment:
-      - FLASK_ENV=development
+    env_file:
+      - ./env/batch.env
     ports:
       - "5010:5010"
     volumes:
@@ -40,12 +38,11 @@ services:
       - cyclus
 
   datastore:
-    container_name: datastore
     build:
       context: datastore
       dockerfile: ./Dockerfile
-    environment:
-      - FLASK_ENV=development
+    env_file:
+      - ./env/datastore.env
     ports:
       - "5020:5020"
     volumes:
@@ -57,10 +54,9 @@ services:
       - cyclus
 
   datastore-db:
-    container_name: datastore-db
+#    container_name: datastore-db
     image: "mongo:latest"
-#    env_file:
-#      - ./env/datastore_db.env
+#
     restart: always
     ports:
       - "27017:27017"
@@ -71,7 +67,7 @@ services:
 
 
   gateway:
-    container_name: gateway
+#    container_name: gateway
     build:
       context: gateway
       dockerfile: ./docker/Dockerfile
