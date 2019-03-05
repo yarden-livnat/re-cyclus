@@ -1,4 +1,4 @@
-version: "3"
+version: "3.3"
 services:
   redis:
     image: "redis:alpine"
@@ -12,6 +12,7 @@ services:
     build:
       context: batch
       dockerfile: ./Dockerfile
+    image: ylivnat/recyclus-batch
     env_file:
       - ./env/batch.env
     ports:
@@ -28,6 +29,7 @@ services:
     build:
       context: worker
       dockerfile: ./Dockerfile
+    image: ylivnat/recyclus-worker
     volumes:
       - ./worker:/code
       - ./repositories/jobs:/jobs
@@ -41,6 +43,7 @@ services:
     build:
       context: datastore
       dockerfile: ./Dockerfile
+    image: ylivnat/recyclus-datastore
     env_file:
       - ./env/datastore.env
     ports:
@@ -54,9 +57,7 @@ services:
       - cyclus
 
   datastore-db:
-#    container_name: datastore-db
     image: "mongo:latest"
-#
     restart: always
     ports:
       - "27017:27017"
@@ -67,13 +68,10 @@ services:
 
 
   gateway:
-#    container_name: gateway
     build:
       context: gateway
       dockerfile: ./docker/Dockerfile
-    environment:
-      - FLASK_ENV=development
-      - FOO=bar
+    image: ylivnat/recyclus-gateway
     env_file:
       - env/gateway.env
     ports:
@@ -87,6 +85,10 @@ services:
       - redis
       - batch
       - datastore
+
+configs:
+  redis:
+    file: ./redis-config.txt
 
 volumes:
   data:
