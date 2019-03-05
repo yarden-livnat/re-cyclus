@@ -1,0 +1,99 @@
+version: "3"
+services:
+  redis:
+    image: "redis:alpine"
+    command: redis-server --appendonly yes
+#    volumes:
+#      - /repositories/redis:/data
+    networks:
+      - cyclus
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  batch:
+    build:
+      context: batch
+      dockerfile: ./Dockerfile
+    image: ylivnat/recyclus-batch
+    env_file:
+      - ./env/batch.env
+    ports:
+      - "5010:5010"
+    volumes:
+      - ./batch:/code
+#      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - redis
+    networks:
+      - cyclus
+
+  worker:
+    build:
+      context: worker
+      dockerfile: ./Dockerfile
+    image: ylivnat/recyclus-worker
+    volumes:
+      - ./worker:/code
+#      - ./repositories/jobs:/jobs
+    restart: on-failure
+    depends_on:
+      - redis
+    networks:
+      - cyclus
+
+  datastore:
+    build:
+      context: datastore
+      dockerfile: ./Dockerfile
+    image: ylivnat/recyclus-datastore
+    env_file:
+      - ./env/datastore.env
+    ports:
+      - "5020:5020"
+    volumes:
+      - ./datastore:/code
+#      - ./repositories/datastore/files:/files
+    depends_on:
+      - datastore-db
+    networks:
+      - cyclus
+
+  datastore-db:
+    image: "mongo:latest"
+    restart: always
+    ports:
+      - "27017:27017"
+#    volumes:
+#      - ./repositories/datastore/db:/data/db
+    networks:
+      - cyclus
+
+
+  gateway:
+    build:
+      context: gateway
+      dockerfile: ./docker/Dockerfile
+    image: ylivnat/recyclus-gateway
+    env_file:
+      - env/gateway.env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./gateway:/code
+#      - ./repositories/gateway:/data
+    networks:
+      - cyclus
+    depends_on:
+      - redis
+      - batch
+      - datastore
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+volumes:
+  data:
+
+networks:
+  cyclus:
