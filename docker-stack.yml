@@ -13,7 +13,7 @@ services:
 
   batch:
     build:
-      context: batch
+      context: services/batch
       dockerfile: ./Dockerfile
     image: ylivnat/recyclus-batch
     env_file:
@@ -30,7 +30,7 @@ services:
 
   worker:
     build:
-      context: worker
+      context: services/worker
       dockerfile: ./Dockerfile
     image: ylivnat/recyclus-worker
     volumes:
@@ -44,7 +44,7 @@ services:
 
   datastore:
     build:
-      context: datastore
+      context: services/datastore
       dockerfile: ./Dockerfile
     image: ylivnat/recyclus-datastore
     env_file:
@@ -72,7 +72,7 @@ services:
 
   gateway:
     build:
-      context: gateway
+      context: services/gateway
       dockerfile: ./docker/Dockerfile
     image: ylivnat/recyclus-gateway
     env_file:
