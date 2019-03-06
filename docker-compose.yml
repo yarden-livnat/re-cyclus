@@ -61,6 +61,8 @@ services:
     restart: always
     ports:
       - "27017:27017"
+    env_file:
+      - ./env/datastore-db.env
     volumes:
       - ./repositories/datastore/db:/data/db
     networks:
@@ -86,12 +88,12 @@ services:
       - batch
       - datastore
 
-configs:
-  redis:
-    file: ./redis-config.txt
+#configs:
+#  redis:
+#    file: ./redis-config.txt
 
-volumes:
-  data:
+#volumes:
+#  data:
 
 networks:
   cyclus:
