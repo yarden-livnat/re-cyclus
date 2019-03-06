@@ -70,7 +70,7 @@ services:
   gateway:
     build:
       context: services/gateway
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./Dockerfile
     image: ylivnat/recyclus-gateway
     env_file:
       - env/gateway.env
