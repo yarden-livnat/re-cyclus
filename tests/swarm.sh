@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+declare -e machines=('vm1', 'vm2', 'vm3')
+
+for machine in '${machines[@]}'
+do
+    echo '$machine'
+done
+
 #docker-machine create --driver virtualbox -virtualbox-share-folder `pwd`/repositories:/repositories vm1
 #docker-machine create --driver virtualbox -virtualbox-share-folder `pwd`/repositories:/repositories vm2
 #docker-machine create --driver virtualbox -virtualbox-share-folder `pwd`/repositories:/repositories vm3

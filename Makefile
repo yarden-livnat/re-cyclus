@@ -1,13 +1,13 @@
 export user ?= ylivnat
 
-targets := all build push clean
+targets := all build push clean status
 
 SERVICES := gateway batch worker datastore
 
 $(targets): $(SERVICES)
 
 $(SERVICES):
-	@echo $(MAKE) -C services/$@ $(MAKECMDGOALS)
+	$(MAKE) -C services/$@ $(MAKECMDGOALS)
 
 .PHONY: $(targets) $(SERVICES)
 
