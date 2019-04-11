@@ -10,9 +10,8 @@ consist of several microservices:
 This repository contains docker files for running recyclus-services in various configurations on a single machine or on 
 a cluster using docker swarm.
 
-### Option 1: A single machine
+### Option 1: A single machine  (docker-compose)
 
-#### using docker-compose
 Start Recyclus services on a local machine
 
 * Start: `docker-compose up -d`
@@ -20,18 +19,18 @@ Start Recyclus services on a local machine
 
 ### Option 2: Swarm cluster
 
-#### setup the cluster
+#### Setup the cluster
 * start a swarm cluster on a manager machine
 * join the swarm from each machine
 * Alt: to test locally on a single machine: `docker swarm init`
 
-#### deploy
+#### Deploy
 `docker stack deploy -c docker-stack.yml recyclus`
 
-#### take down
+#### Take down
 `docker stack rm recyclus`
 
-#### take down swarm
+#### Take down swarm
 `docker swarm leave --force`
 
 
