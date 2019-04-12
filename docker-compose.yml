@@ -7,6 +7,9 @@ services:
       - ./repositories/redis:/data
     networks:
       - cyclus
+#    deploy:
+#      placement:
+#        constraints: [node.role == manager]
 
   batch:
     build:
@@ -87,10 +90,9 @@ services:
       - redis
       - batch
       - datastore
-
-#configs:
-#  redis:
-#    file: ./redis-config.txt
+#    deploy:
+#      placement:
+#        constraints: [node.role == manager]
 
 #volumes:
 #  data:
