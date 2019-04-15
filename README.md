@@ -20,26 +20,15 @@ a cluster using docker swarm.
 `make dev`
 
 This will set up the development environment. 
-* Creates two additional directories
-	* ./services - micoservices codes from github
-	* ./repositories - local data repositories for the various services)
-* clone the micoservices git repositories in services/ 
-* set up repositories/
+* create ./services directory and clone the micoservices projects from github
+* create ./repositories directory where the services will maintain their data for debuging purposes
+* asks for an admin passpord for mongodb service
 
-Next, you must configure the environment 
 
 ### Production environment 
 `make setup`
 
-Next, you must configure the environment 
  
-### Configuration
-
-The configuration files are in ./env
-
-You need to setup a password for the mongo db in datastore.env and datastore
-
-
 ## Running
 
 ### Option 1: Run on local machine using docker-compose
