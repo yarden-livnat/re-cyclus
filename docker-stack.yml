@@ -62,6 +62,8 @@ services:
   datastore-db:
     image: "mongo:latest"
     restart: always
+    env_file:
+      - ./env/datastore-db.env
     ports:
       - "27017:27017"
 #    volumes:
