@@ -1,9 +1,0 @@
-[submodule "batch"]
-	path = batch
-	url = https://github.com/yarden-livnat/recyclus-batch.git
-[submodule "worker"]
-	path = worker
-	url = https://github.com/yarden-livnat/recyclus-worker.git
-[submodule "datastore"]
-	path = datastore
-	url = https://github.com/yarden-livnat/recyclus-datastore.git
