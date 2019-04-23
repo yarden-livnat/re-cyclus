@@ -23,9 +23,7 @@ repositories:
 	@mkdir -p repositories/redis
 	@mkdir -p repositories/gateway
 	@mkdir -p repositories/jobs
-	@mkdir -p repositories/datastore/db repositories/datastore/db
-
-
+	@mkdir -p repositories/datastore/db repositories/datastore/files
 
 env:
 	@echo "set env"
@@ -42,6 +40,9 @@ env:
 setup: env
 
 
+prod: env repositories
+
+
 dev: clone repositories setup build
 	@echo dev environment ready
 
@@ -51,4 +52,4 @@ clean-repositories:
 clean: clean-repositories repositories
 	rm -rf env
 
-.PHONY: $(targets) $(SERVICES) services-dir setup clean-repositories dev clone
+.PHONY: $(targets) $(SERVICES) services-dir setup clean-repositories dev clone local
