@@ -1,10 +1,10 @@
-version: "3"
+version: "3.3"
 services:
   redis:
     image: "redis:alpine"
     command: redis-server --appendonly yes
-#    volumes:
-#      - /repositories/redis:/data
+    volumes:
+      - ./repositories/redis:/data
     networks:
       - cyclus
     deploy:
@@ -21,8 +21,8 @@ services:
     ports:
       - "5010:5010"
     volumes:
-      - ./batch:/code
-#      - /var/run/docker.sock:/var/run/docker.sock
+      - ./services/batch:/code
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - redis
     networks:
@@ -34,9 +34,11 @@ services:
       dockerfile: ./Dockerfile
     image: ylivnat/recyclus-worker
     volumes:
-      - ./worker:/code
-#      - ./repositories/jobs:/jobs
+      - ./services/worker:/code
+      - ./repositories/jobs:/jobs
     restart: on-failure
+    deploy:
+      replicas: 1
     depends_on:
       - redis
     networks:
@@ -52,8 +54,8 @@ services:
     ports:
       - "5020:5020"
     volumes:
-      - ./datastore:/code
-#      - ./repositories/datastore/files:/files
+      - ./services/datastore:/code
+      - ./repositories/datastore/files:/files
     depends_on:
       - datastore-db
     networks:
@@ -66,8 +68,8 @@ services:
       - ./env/datastore-db.env
     ports:
       - "27017:27017"
-#    volumes:
-#      - ./repositories/datastore/db:/data/db
+    volumes:
+      - ./repositories/datastore/db:/data/db
     networks:
       - cyclus
 
@@ -82,8 +84,8 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./gateway:/code
-#      - ./repositories/gateway:/data
+      - ./services/gateway:/code
+      - ./repositories/gateway:/data
     networks:
       - cyclus
     depends_on:
@@ -94,8 +96,8 @@ services:
       placement:
         constraints: [node.role == manager]
 
-volumes:
-  data:
+#volumes:
+#  data:
 
 networks:
   cyclus:

@@ -37,6 +37,8 @@ services:
       - ./services/worker:/code
       - ./repositories/jobs:/jobs
     restart: on-failure
+    deploy:
+      replicas: 1
     depends_on:
       - redis
     networks:
@@ -62,10 +64,10 @@ services:
   datastore-db:
     image: "mongo:latest"
     restart: always
-    ports:
-      - "27017:27017"
     env_file:
       - ./env/datastore-db.env
+    ports:
+      - "27017:27017"
     volumes:
       - ./repositories/datastore/db:/data/db
     networks:
