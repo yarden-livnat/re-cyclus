@@ -12,16 +12,12 @@ services:
         constraints: [node.role == manager]
 
   batch:
-    build:
-      context: services/batch
-      dockerfile: ./Dockerfile
     image: ylivnat/recyclus-batch
     environment:
       - FLASK_ENV
     env_file:
       - ./env/batch.env
     volumes:
-      - ./services/batch:/code
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - redis
@@ -29,32 +25,23 @@ services:
       - cyclus
 
   worker:
-    build:
-      context: services/worker
-      dockerfile: ./Dockerfile
     image: ylivnat/recyclus-worker
-    volumes:
-      - ./services/worker:/code
-      - ./repositories/jobs:/jobs
-    restart: on-failure
     deploy:
-      replicas: 2
+      replicas: 3
+      restart_policy:
+        condition: on-failure
     depends_on:
       - redis
     networks:
       - cyclus
 
   datastore:
-    build:
-      context: services/datastore
-      dockerfile: ./Dockerfile
     image: ylivnat/recyclus-datastore
     environment:
       - FLASK_ENV
     env_file:
       - ./env/datastore.env
     volumes:
-      - ./services/datastore:/code
       - ./repositories/datastore/files:/files
     depends_on:
       - datastore-db
@@ -63,18 +50,18 @@ services:
 
   datastore-db:
     image: "mongo:latest"
-    restart: always
     env_file:
       - ./env/datastore-db.env
     volumes:
       - ./repositories/datastore/db:/data/db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
     networks:
       - cyclus
 
   gateway:
-    build:
-      context: services/gateway
-      dockerfile: ./Dockerfile
     image: ylivnat/recyclus-gateway
     environment:
       - FLASK_ENV
@@ -83,7 +70,6 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./services/gateway:/code
       - ./repositories/gateway:/data
     networks:
       - cyclus
@@ -94,9 +80,6 @@ services:
     deploy:
       placement:
         constraints: [node.role == manager]
-
-#volumes:
-#  data:
 
 networks:
   cyclus:

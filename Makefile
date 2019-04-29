@@ -10,7 +10,6 @@ $(SERVICES):
 	$(MAKE) -C services/$@ $(MAKECMDGOALS)
 
 
-
 services-dir:
 	@mkdir -p services
 
@@ -37,19 +36,32 @@ env:
 	@echo JWT_SECRET_KEY=`LC_ALL=C tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_\`{|}~' </dev/urandom | head -c 13` | cat env-template/gateway.env - > env/gateway.env
 
 
-setup: env
+setup-clean:
+	rm -rf env repositories
 
+setup: setup-clean env repositories
 
-prod: env repositories
+#
+# prod/dev environments
+#
 
+prod: setup
+	@echo production environment ready
 
-dev: clone repositories setup build
+dev: setup clone build
 	@echo dev environment ready
 
-clean-repositories:
-	rm -rf repositories
 
-clean: clean-repositories repositories
-	rm -rf env
+#
+# docker swarm
+#
 
-.PHONY: $(targets) $(SERVICES) services-dir setup clean-repositories dev clone local
+start:
+	docker stack deploy -c docker-stack.yml recyclus
+	docker service ls
+
+stop:
+	docker stack rm recyclus
+
+
+.PHONY: $(targets) $(SERVICES) services-dir setup clean-repositories dev clone local stack-up stack-down reset-clean
