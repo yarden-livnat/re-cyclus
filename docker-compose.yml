@@ -16,6 +16,8 @@ services:
       context: services/batch
       dockerfile: ./Dockerfile
     image: ylivnat/recyclus-batch
+    environment:
+      - FLASK_ENV
     env_file:
       - ./env/batch.env
     ports:
@@ -49,6 +51,8 @@ services:
       context: services/datastore
       dockerfile: ./Dockerfile
     image: ylivnat/recyclus-datastore
+    environment:
+      - FLASK_ENV
     env_file:
       - ./env/datastore.env
     ports:
@@ -72,7 +76,6 @@ services:
       - ./repositories/datastore/db:/data/db
     networks:
       - cyclus
-
 
   gateway:
     build:
