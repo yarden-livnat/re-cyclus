@@ -7,15 +7,11 @@ services:
       - ./repositories/redis:/data
     networks:
       - cyclus
-#    deploy:
-#      placement:
-#        constraints: [node.role == manager]
 
   batch:
     build:
       context: services/batch
       dockerfile: ./Dockerfile
-    image: ylivnat/recyclus-batch
     environment:
       - FLASK_ENV
     env_file:
@@ -34,13 +30,8 @@ services:
     build:
       context: services/worker
       dockerfile: ./Dockerfile
-    image: ylivnat/recyclus-worker
     volumes:
       - ./services/worker:/code
-      - ./repositories/jobs:/jobs
-    restart: on-failure
-    deploy:
-      replicas: 1
     depends_on:
       - redis
     networks:
@@ -50,7 +41,6 @@ services:
     build:
       context: services/datastore
       dockerfile: ./Dockerfile
-    image: ylivnat/recyclus-datastore
     environment:
       - FLASK_ENV
     env_file:
@@ -81,7 +71,6 @@ services:
     build:
       context: services/gateway
       dockerfile: ./Dockerfile
-    image: ylivnat/recyclus-gateway
     env_file:
       - env/gateway.env
     ports:
@@ -95,12 +84,6 @@ services:
       - redis
       - batch
       - datastore
-#    deploy:
-#      placement:
-#        constraints: [node.role == manager]
-
-#volumes:
-#  data:
 
 networks:
   cyclus:
