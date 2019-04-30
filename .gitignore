@@ -4,3 +4,5 @@ services/*
 notes.txt
 build/
 .idea/
+
+redis-job/
