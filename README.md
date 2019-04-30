@@ -19,27 +19,28 @@ a cluster using docker swarm.
 
 ## Quick Start
 
-Setup production environment: `make prod`
-* Start docker swarm: `docker swarm init`
-* Deploy recyclus services on local machine: `docker stack deploy -c docker-compose.yml recyclus`
-* Interact with the system via python package: [Recyclus](https://github.com/yarden-livnat/recyclus.git)
-* Take down: `docker stack rm recyclus`
-* Shut down the swarm: `docker swarm leave --force`
+* Setup base environment: `make prod`
+* Start the services: `docker-compose -f docker-compose.yml up -d`
+* Stop the services: `docker-compose down`
+
+To interact with the services use python package: [Recyclus](https://github.com/yarden-livnat/recyclus.git)
 
 
 ## Development
-Set up the development environment: `make dev`
-* Create ./services directory and clone the micoservices projects from github
-* Create ./repositories directory where the services will maintain their data for debuging purposes
-* Asks for an admin password for mongodb service
+Set up the development environment: `make dev`. This will Create ./services directory and clone the micoservices 
+projects from github.
 
-#### Running
-* Start: `docker-compose up -d`
-* Stop: `docker-compose down`
+* Start the services: `docker-compose up`
+* Stop the services: `docker-compose down`
 
+In this setup, each service container will mount the appropriate "./services/SERVICE" code directory. 
 
 ## Distributed Deployment 
-Modify the docker-stack.yml file to fit your distributed environment and deploy using 
-```
-docker stack -f docker-stack.yml recyclus
-```
+Distributed deployment is done using docker swarm.
+
+To use docker swam on a single machine
+* start: `make start`
+* stop: `make stop`
+* exit swarm mode: `make exit`
+
+In order to deploy on multiple machine you'll need to modify and adapt docker-stack.yml

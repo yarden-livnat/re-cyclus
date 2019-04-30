@@ -1,0 +1,41 @@
+version: "3.3"
+services:
+  batch:
+    build:
+      context: services/batch
+      dockerfile: ./Dockerfile
+    environment:
+      - FLASK_ENV
+    ports:
+      - "5010:5010"
+    volumes:
+      - ./services/batch:/code
+
+  worker:
+    build:
+      context: services/worker
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./services/worker:/code
+
+  datastore:
+    build:
+      context: services/datastore
+      dockerfile: ./Dockerfile
+    environment:
+      - FLASK_ENV
+    ports:
+      - "5020:5020"
+    volumes:
+      - ./services/datastore:/code
+
+  datastore-db:
+    ports:
+      - "27017:27017"
+
+  gateway:
+    build:
+      context: services/gateway
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./services/gateway:/code
