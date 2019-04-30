@@ -37,7 +37,7 @@ env:
 setup-clean:
 	rm -rf env repositories
 
-setup: setup-clean env repositories
+setup: env repositories
 
 #
 # prod/dev environments
