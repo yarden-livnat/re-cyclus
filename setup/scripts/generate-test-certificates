@@ -1,0 +1,31 @@
+#!/bin/bash
+
+
+set -eo pipefail
+
+source "$(dirname "$(realpath "$0")")/functions.sh"
+
+#####
+## This script generates test certificates for a local test installation. These
+## certificates should obviously not be used in production.
+#####
+
+[ -z "$RECYCLUS_HOSTNAME" ] && error "RECYCLUS_HOSTNAME must be set"
+
+CERTS="/recyclus/certificates"
+
+info "Generating self-signed test certificates"
+
+if [ ! -f "$CERTS/hostcert/hostcert.crt" ]; then
+    : ${RECYCLUS_HOSTCERT_SUBJECT:="/O=recyclus/CN=$RECYCLUS_HOSTNAME"}
+    info "Creating self-signed host certificate with subject = $RECYCLUS_HOSTCERT_SUBJECT"
+    mkdir -p "$CERTS/hostcert"
+    openssl req -new -nodes -x509 -extensions v3_ca -days 3650  \
+        -subj "$RECYCLUS_HOSTCERT_SUBJECT" \
+        -keyout "$CERTS/hostcert/hostcert.key" \
+        -out "$CERTS/hostcert/hostcert.crt"
+else
+    warn "Host certificate already exists - skipping"
+fi
+
+info "Done"

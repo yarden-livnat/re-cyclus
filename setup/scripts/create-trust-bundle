@@ -1,0 +1,49 @@
+#!/bin/bash
+
+set -eo pipefail
+
+source "$(dirname "$(realpath "$0")")/functions.sh"
+
+#####
+## This script creates a PEM-encoded trust bundle containing the following certificates:
+##
+##   1. Certificates from $RECYCLUS_CONFIG/certificates/recyclus_trusted_certificates.tar, if present
+##   3. The host SSL certificate, only if it is self-signed
+#####
+
+[ -z "$RECYCLUS_HOSTNAME" ] && error "RECYCLUS_HOSTNAME must be set"
+
+CERTS="/recyclus/certificates"
+
+info "Creating PEM-encoded trust bundle"
+
+BUNDLE="$CERTS/recyclus-trust-bundle.pem"
+rm -f "$BUNDLE"
+touch "$BUNDLE"
+
+# If the tarball exists, unpack it and add the certificates to the bundle
+if [ -f "$CERTS/recyclus_trusted_certificates.tar" ]; then
+    info "Unpacking existing trustroots"
+    tar -xf "$CERTS/recyclus_trusted_certificates.tar" -C "$CERTS"
+    for certfile in $(grep -lr -- "-----BEGIN CERTIFICATE-----" "$CERTS/recyclus_trusted_certificates"); do
+        info "  Appending $certfile to bundle"
+        cat "$certfile" >> "$BUNDLE"
+    done
+    rm -rf "$CERTS/recyclus_trusted_certificates"
+else
+    warn "recyclus_trusted_certificates.tar not present"
+fi
+
+# If the host SSL certificate is self-signed, add it to the trust bundle
+if [ -f "$CERTS/hostcert/hostcert.crt" ]; then
+    if openssl verify -CAfile "$CERTS/hostcert/hostcert.crt" "$CERTS/hostcert/hostcert.crt" > /dev/null 2>&1; then
+        info "Appending self-signed host certificate to trust bundle"
+        cat "$CERTS/hostcert/hostcert.crt" >> "$BUNDLE"
+    else
+        warn "Host certificate is not self-signed - skipping"
+    fi
+else
+    warn "Host certificate does not exist - skipping"
+fi
+
+info "Done"
