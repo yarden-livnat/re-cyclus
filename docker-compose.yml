@@ -1,17 +1,28 @@
-version: "3.3"
+# Docker Compose file to start a full RECYCLUS node.
+#
+# Required env variables:
+#
+# RECYCLUS_CONFIG : points to the root RECYCLUS configuration directory
+#       example: export RECYCLUS_CONFIG=/Users/yarden/RECYCLUS_CONFIG
+# RECYCLUS_HOSTNAME: HostName or IP address for apache httpd front-end server
+#       example: export RECYCLUS_HOSTNAME=my.recyclus.node
+#       example: export RECYCLUS_HOSTNAME=`docker-machine ip`
+# RECYCLUS_VERSION: version of RECYCLUS/Docker distribution
+#       example: export RECYCLUS_VERSION=1.0
+
+version: "3.4"
+
 services:
   redis:
     image: "redis:alpine"
     command: redis-server --appendonly yes
     volumes:
-      - ./repositories/redis:/data
+      - redis:/data
     networks:
       - cyclus
 
   batch:
-    image: ylivnat/recyclus-batch
-    env_file:
-      - ./env/batch.env
+    image: ${RECYCLUS_HUB}/recyclus-batch:${RECYCLUS_VERSION-latest}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
@@ -20,41 +31,51 @@ services:
       - cyclus
 
   worker:
-    image: ylivnat/recyclus-worker
+    image: ${RECYCLUS_HUB}/recyclus-worker:${RECYCLUS_VERSION-latest}
     depends_on:
       - redis
     networks:
       - cyclus
 
   datastore:
-    image: ylivnat/recyclus-datastore
-    env_file:
-      - ./env/datastore.env
+    image: ${RECYCLUS_HUB}/recyclus-datastore:${RECYCLUS_VERSION-latest}
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /recyclus/secrets/mongo-admin
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /recyclus/secrets/mongo-password
     volumes:
-      - ./repositories/datastore/files:/files
+      - "$RECYCLUS_CONFIG/secrets/mongo-password:/recyclus/secrets/mongo-password:ro"
+      - "$RECYCLUS_CONFIG/secrets/mongo-admin:/recyclus/secrets/mongo-admin:ro"
+      - datastore-files:/files
     depends_on:
       - datastore-db
     networks:
       - cyclus
 
-  datastore-db:
+  datastore-db:docker
     image: "mongo:latest"
     restart: always
-    env_file:
-      - ./env/datastore-db.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /recyclus/secrets/mongo-admin
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /recyclus/secrets/mongo-password
     volumes:
-      - ./repositories/datastore/db:/data/db
+      - "$RECYCLUS_CONFIG/secrets/mongo-password:/recyclus/secrets/mongo-password:ro"
+      - "$RECYCLUS_CONFIG/secrets/mongo-admin:/recyclus/secrets/mongo-admin:ro"
+      - datastore-info:/data/db
     networks:
       - cyclus
 
   gateway:
-    image: ylivnat/recyclus-gateway
-    env_file:
-      - env/gateway.env
+    image: ${RECYCLUS_HUB}/recyclus-gateway:${RECYCLUS_VERSION-latest}
     ports:
-      - "5000:5000"
+      - "5000:80"
+    environment:
+      JWT_SECRET_KEY_FILE: /recyclus/secrets/jwt-key
     volumes:
-      - ./repositories/gateway:/data
+      - "$RECYCLUS_CONFIG/certificates/hostcert:/recyclus/certificates/:ro"
+      - "$RECYCLUS_CONFIG/secrets/gateway-password:/recyclus/secrets/gateway-password:ro"
+      - "$RECYCLUS_CONFIG/secrets/jwt-key:/recyclus/secrets/jwt-key:ro"
+      - gateway-db:/data
     networks:
       - cyclus
     depends_on:
@@ -64,3 +85,9 @@ services:
 
 networks:
   cyclus:
+
+volumes:
+  redis:
+  gateway-db:
+  datastore-files:
+  datastore-info:

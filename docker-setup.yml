@@ -1,0 +1,22 @@
+# Docker Compose file to start a full RECYCLUS node.
+#
+# Required env variables:
+#
+# RECYCLUS_CONFIG : points to the root RECYCLUS configuration directory
+#       example: export RECYCLUS_CONFIG=/Users/yarden/RECYCLUS_CONFIG
+# RECYCLUS_VERSION: version of RECYCLUS/Docker distribution
+#       example: export RECYCLUS_VERSION=1.0
+
+version: "3.4"
+
+services:
+  setup:
+    image: ${RECYCLUS_HUB}/recyclus-setup
+    build: ./setup
+    environment:
+      RECYCLUS_HOSTNAME:
+    volumes:
+      - "$RECYCLUS_CONFIG:/recyclus"
+    command: ["true"]
+
+

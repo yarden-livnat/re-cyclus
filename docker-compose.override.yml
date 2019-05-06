@@ -1,8 +1,10 @@
-version: "3.3"
+version: "3.4"
+
 services:
+
   batch:
     build:
-      context: services/batch
+      context: ./services/batch
       dockerfile: ./Dockerfile
     environment:
       - FLASK_ENV
@@ -13,14 +15,14 @@ services:
 
   worker:
     build:
-      context: services/worker
+      context: ./services/worker
       dockerfile: ./Dockerfile
     volumes:
       - ./services/worker:/code
 
   datastore:
     build:
-      context: services/datastore
+      context: ./services/datastore
       dockerfile: ./Dockerfile
     environment:
       - FLASK_ENV
@@ -35,7 +37,7 @@ services:
 
   gateway:
     build:
-      context: services/gateway
+      context: ./services/gateway
       dockerfile: ./Dockerfile
     volumes:
       - ./services/gateway:/code

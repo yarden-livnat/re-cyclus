@@ -1,10 +1,36 @@
-version: "3.3"
+# Docker Compose file to start a full RECYCLUS node.
+#
+# Required env variables:
+#
+# RECYCLUS_CONFIG : points to the root RECYCLUS configuration directory
+#       example: export RECYCLUS_CONFIG=/Users/yarden/RECYCLUS_CONFIG
+# RECYCLUS_HOSTNAME: HostName or IP address for apache httpd front-end server
+#       example: export RECYCLUS_HOSTNAME=my.recyclus.node
+#       example: export RECYCLUS_HOSTNAME=`docker-machine ip`
+# RECYCLUS_VERSION: version of RECYCLUS/Docker distribution
+#       example: export RECYCLUS_VERSION=1.0
+version: "3.4"
+
+secrets:
+  gateway-ca-bundle:
+    file: $RECYCLUS_CONFIG/certificates/recyclus-trust-bundle.pem
+  gateway-certificates_crt:
+    file: $RECYCLUS_CONFIG/certificates//hostcert/hostcert.crt
+  gateway-certificates_key:
+    file: $RECYCLUS_CONFIG/certificates//hostcert/hostcert.key
+  gateway-jwt-key:
+    file: $RECYCLUS_CONFIG/secrets/jwt-key
+  mongo-admin:
+    file: $RECYCLUS_CONFIG/secrets/mongo-admin
+  mongo-password:
+    file: $RECYCLUS_CONFIG/secrets/mongo-password
+
 services:
   redis:
     image: "redis:alpine"
     command: redis-server --appendonly yes
     volumes:
-      - ./repositories/redis:/data
+      - redis:/data
     networks:
       - cyclus
     deploy:
@@ -12,75 +38,94 @@ services:
         constraints: [node.role == manager]
 
   batch:
-    image: ylivnat/recyclus-batch
-    environment:
-      - FLASK_ENV
-    env_file:
-      - ./env/batch.env
+    image: ${RECYCLUS_HUB}/recyclus-batch:${RECYCLUS_VERSION-latest}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - redis
     networks:
       - cyclus
+    deploy:
+      mode: replicated
+      replicas: 1
 
   worker:
-    image: ylivnat/recyclus-worker
-    deploy:
-      replicas: 3
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-    depends_on:
-      - redis
+    image: ${RECYCLUS_HUB}/recyclus-worker:${RECYCLUS_VERSION-latest}
     networks:
       - cyclus
+    deploy:
+      mode: replicated
+      replicas: 3
+
 
   datastore:
-    image: ylivnat/recyclus-datastore
+    image: ${RECYCLUS_HUB}/recyclus-datastore:${RECYCLUS_VERSION-latest}
+    secrets:
+      - source: mongo-admin
+        target: /recyclus/secrets/mongo-admin
+      - source: mongo-password
+        target: /recyclus/secrets/mongo-password
     environment:
-      - FLASK_ENV
-    env_file:
-      - ./env/datastore.env
+      MONGO_INITDB_ROOT_USERNAME_FILE: /recyclus/secrets/mongo-admin
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /recyclus/secrets/mongo-password
     volumes:
-      - ./repositories/datastore/files:/files
-    depends_on:
-      - datastore-db
+      - datastore-files:/files
     networks:
       - cyclus
+    deploy:
+      mode: replicated
+      replicas: 1
+#      placement:
+#        constraints: [node.labels.recylcus_datastore == true]
+
 
   datastore-db:
     image: "mongo:latest"
-    env_file:
-      - ./env/datastore-db.env
+    secrets:
+      - source: mongo-admin
+        target: /recyclus/secrets/mongo-admin
+      - source: mongo-password
+        target: /recyclus/secrets/mongo-password
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /recyclus/secrets/mongo-admin
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /recyclus/secrets/mongo-password
     volumes:
-      - ./repositories/datastore/db:/data/db
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
+      - datastore-info:/data/db
     networks:
       - cyclus
+    deploy:
+      mode: replicated
+      replicas: 1
+#      placement:
+#        constraints: [node.labels.recylcus_datastore_db == true]
+
 
   gateway:
-    image: ylivnat/recyclus-gateway
-    environment:
-      - FLASK_ENV
-    env_file:
-      - env/gateway.env
+    image: ${RECYCLUS_HUB}/recyclus-gateway:${RECYCLUS_VERSION-latest}
     ports:
-      - "5000:5000"
+      - "5000:80"
+    secrets:
+#      - source: gateway-ca-bundle
+#        target: /recyclus/certificates/recyclus-trust-bundle.pem
+      - source: gateway-certificates_crt
+        target: /recyclus/certificates/hostcert.crt
+      - source: gateway-certificates_key
+        target: /recyclus/certificates/hostcert.key
+      - source: gateway-jwt-key
+        target: /recyclus/secrets/jwt-key
+    environment:
+      JWT_SECRET_KEY_FILE: /recyclus/secrets/jwt-key
     volumes:
-      - ./repositories/gateway:/data
+      - gateway-db:/data
     networks:
       - cyclus
-    depends_on:
-      - redis
-      - batch
-      - datastore
     deploy:
       placement:
         constraints: [node.role == manager]
 
 networks:
   cyclus:
+
+volumes:
+  redis:
+  gateway-db:
+  datastore-files:
+  datastore-info:
